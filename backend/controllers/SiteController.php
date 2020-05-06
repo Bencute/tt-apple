@@ -1,7 +1,10 @@
 <?php
 namespace backend\controllers;
 
+use common\components\AppleRepository;
+use common\models\Apple;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -26,7 +29,8 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index'],
+//                        'actions' => ['logout'],
+                        'actions' => ['logout', 'index', 'generate', 'fall', 'eat', 'throw'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -60,7 +64,41 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        /** @var AppleRepository $appleRepository */
+        $appleRepository = Yii::$app->appleRepository;
+
+        $apples = $appleRepository->getAll();
+
+        return $this->render('index', [
+            'apples' => $apples
+        ]);
+    }
+
+    public function actionGenerate(int $count)
+    {
+        Yii::$app->appleRepository->generateRandom($count);
+        return $this->redirect(['index']);
+    }
+
+    public function actionEat(int $count, int $id)
+    {
+        Yii::$app->appleRepository->getById($id)->eat($count);
+
+        return $this->redirect(['index']);
+    }
+
+    public function actionFall(int $id)
+    {
+        Yii::$app->appleRepository->getById($id)->fall();
+
+        return $this->redirect(['index']);
+    }
+
+    public function actionThrow(int $id)
+    {
+        Yii::$app->appleRepository->getById($id)->throw();
+
+        return $this->redirect(['index']);
     }
 
     /**

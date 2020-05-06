@@ -10,6 +10,7 @@ return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
+    'language' => 'ru-RU',
     'bootstrap' => ['log'],
     'modules' => [],
     'components' => [
@@ -36,6 +37,9 @@ return [
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
+        ],
+        'appleRepository' => [
+            'class' => \common\components\AppleRepository::class,
         ],
         /*
         'urlManager' => [
