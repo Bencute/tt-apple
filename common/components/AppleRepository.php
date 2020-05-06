@@ -51,4 +51,26 @@ class AppleRepository extends \yii\base\Component implements AppleRepositoryInte
     {
         return new Apple($arApple);
     }
+
+    /**
+     * @param int $count
+     * @return array
+     */
+    public function generateRandom(int $count = 3): array
+    {
+        $apples = [];
+        for ($i = 0; $i < $count; $i++){
+            $apples[] = $this->add($this->randomHexRgbColor());
+        }
+        return $apples;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function randomHexRgbColor(): string
+    {
+        return bin2hex(random_bytes(3));
+    }
 }

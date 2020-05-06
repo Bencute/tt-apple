@@ -13,6 +13,13 @@ use Exception;
 abstract class AppleStatus
 {
     /**
+     * Возвращает массив идентификаторов следующих состояний
+     *
+     * @return array Apple::STATE_[]
+     */
+    abstract protected function next(): array;
+
+    /**
      * @var int
      */
     protected int $status;
@@ -80,5 +87,14 @@ abstract class AppleStatus
     public function throw(): void
     {
         throw new Exception('Недопустимое действие');
+    }
+
+    /**
+     * @param int $status
+     * @return bool
+     */
+    public function isAvailableNext(int $status): bool
+    {
+        return array_search($status, $this->next()) !== false;
     }
 }

@@ -20,4 +20,14 @@ class AppleStatusTree extends AppleStatus
         $this->apple->setStatus(Apple::STATUS_FALL);
         $this->apple->setDateFall(new Expression('NOW()'));
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function next(): array
+    {
+        return [
+            Apple::STATUS_FALL,
+        ];
+    }
 }

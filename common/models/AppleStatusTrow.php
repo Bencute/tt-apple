@@ -21,4 +21,12 @@ class AppleStatusTrow extends AppleStatus
     {
         throw new Exception('Состояние неизвестно');
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function next(): array
+    {
+        return [];
+    }
 }

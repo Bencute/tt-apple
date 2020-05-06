@@ -15,7 +15,7 @@ trait AppleStatusThrowTrait
      */
     public function throw(): void
     {
-        $this->apple->deleteAR();
         $this->apple->setStatus(Apple::STATUS_THROW);
+        $this->apple->deleteAR();
     }
 }

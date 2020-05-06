@@ -19,4 +19,14 @@ class AppleStatusRot extends AppleStatus
     {
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function next(): array
+    {
+        return [
+            Apple::STATUS_THROW,
+        ];
+    }
 }

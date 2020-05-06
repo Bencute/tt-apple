@@ -58,7 +58,9 @@ class Apple
             $this->setStatus(self::STATUS_TREE);
         } elseif ($conf instanceof ar\Apple) {
             $this->arApple = $conf;
-            $this->setStatus($this->arApple->getAttribute('status'));
+            $status = $this->getInstanceAppleStatus($this->arApple->getAttribute('status'));
+            if ((string) $status != self::STATUS_FALL || !$status->isRot())
+                $this->status = $status;
         }
     }
 
@@ -88,7 +90,7 @@ class Apple
         $transaction = $this->arApple->getDb()->beginTransaction();
         try {
             $result = $this->arApple->delete();
-            if ($result !== false && $result > 0) {
+            if ($result = 0 || $result === false) {
                 throw new Exception('Невозможно удалить объект из базы');
             }
             $transaction->commit();
@@ -109,28 +111,32 @@ class Apple
 
     /**
      * @param int $statusId
+     * @return AppleStatus
      */
-    public function setStatus(int $statusId): void
+    private function getInstanceAppleStatus(int $statusId): AppleStatus
     {
         switch ($statusId) {
             case self::STATUS_TREE:
-                $this->status = new AppleStatusTree($statusId, $this);
-                break;
+                return new AppleStatusTree($statusId, $this);
             case self::STATUS_FALL:
-                $this->status = new AppleStatusFall($statusId, $this);
-                break;
+                return new AppleStatusFall($statusId, $this);
             case self::STATUS_ROT:
-                $this->status = new AppleStatusRot($statusId, $this);
-                break;
+                return new AppleStatusRot($statusId, $this);
             case self::STATUS_EATED:
-                $this->status = new AppleStatusEated($statusId, $this);
-                break;
+                return new AppleStatusEated($statusId, $this);
             case self::STATUS_THROW:
-                $this->status = new AppleStatusTrow($statusId, $this);
-                break;
+                return new AppleStatusTrow($statusId, $this);
             default:
                 new Exception('Неизвестное состояние');
         }
+    }
+
+    /**
+     * @param int $statusId
+     */
+    public function setStatus(int $statusId): void
+    {
+        $this->status = $this->getInstanceAppleStatus($statusId);
 
         $this->setArAttribute('status', (string) $this->status);
     }
@@ -176,7 +182,7 @@ class Apple
      */
     public function addEat(int $percent): void
     {
-        $this->setArAttribute('eat', $percent);
+        $this->setArAttribute('eat', $this->getEat() + $percent);
     }
 
     /**
@@ -253,5 +259,19 @@ class Apple
     {
         $size = 1 - $this->getEat() / 100;
         return $size < 0 ? 0 : $size;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStringStatus(): string
+    {
+        switch ((string) $this->getStatus()) {
+            case self::STATUS_THROW: return 'Выброшен';
+            case self::STATUS_TREE: return 'На дереве';
+            case self::STATUS_FALL: return 'На земле';
+            case self::STATUS_ROT: return 'Испорчен';
+            case self::STATUS_EATED: return 'Съеден';
+        }
     }
 }
