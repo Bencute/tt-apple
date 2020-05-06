@@ -24,7 +24,7 @@ abstract class AppleStatus
 
     public function __toString()
     {
-        return $this->status;
+        return (string) $this->status;
     }
 
     /**

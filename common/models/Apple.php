@@ -39,23 +39,28 @@ class Apple extends ar\Apple
 
     public AppleStatus $status;
 
+    public string $color;
+
     /**
      * {@inheritdoc}
      */
     public function __construct(string $color, array $config = [])
     {
-        parent::__construct($config);
         $this->color = $color;
+        parent::__construct($config);
     }
 
     public function init()
     {
         parent::init();
 
-        $this->setStatus($this->getStatus());
 
-        if ($this->isNewRecord)
+        if ($this->isNewRecord) {
+            $this->setStatus(self::STATUS_TREE);
             $this->saveAR();
+        } else {
+            $this->setStatus($this->getAttribute('status'));
+        }
     }
 
     public function setStatus(int $statusId): void
