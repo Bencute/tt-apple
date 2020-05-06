@@ -10,7 +10,7 @@ use Exception;
  * Class Apple
  * @package common\models
  */
-class Apple extends ar\Apple
+class Apple
 {
     /**
      * Выкинуто
@@ -37,32 +37,79 @@ class Apple extends ar\Apple
      */
     const STATUS_EATED = 3;
 
-    public AppleStatus $status;
-
-    public string $color;
+    /**
+     * @var AppleStatus
+     */
+    private AppleStatus $status;
 
     /**
-     * {@inheritdoc}
+     * @var ar\Apple|string
      */
-    public function __construct(string $color, array $config = [])
+    private ar\Apple $arApple;
+
+    /**
+     * Apple constructor.
+     * @param string|ar\Apple $conf
+     */
+    public function __construct($conf)
     {
-        $this->color = $color;
-        parent::__construct($config);
-    }
-
-    public function init()
-    {
-        parent::init();
-
-
-        if ($this->isNewRecord) {
+        if (is_string($conf)) {
+            $this->arApple = new ar\Apple(['color' => $conf]);
             $this->setStatus(self::STATUS_TREE);
-            $this->saveAR();
-        } else {
-            $this->setStatus($this->getAttribute('status'));
+        } elseif ($conf instanceof ar\Apple) {
+            $this->arApple = $conf;
+            $this->setStatus($this->arApple->getAttribute('status'));
         }
     }
 
+    /**
+     * @throws Exception
+     */
+    private function saveAR(): void
+    {
+        $transaction = $this->arApple->getDb()->beginTransaction();
+        try {
+            if (!$this->arApple->save()){
+                throw new Exception('Невозможно сохранить объект в базе. ' . var_export($this->arApple->getErrors(), true));
+            }
+            $transaction->commit();
+        }
+        catch (Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function deleteAR(): void
+    {
+        $transaction = $this->arApple->getDb()->beginTransaction();
+        try {
+            $result = $this->arApple->delete();
+            if ($result !== false && $result > 0) {
+                throw new Exception('Невозможно удалить объект из базы');
+            }
+            $transaction->commit();
+        }
+        catch (Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function applyChange(): void
+    {
+        $this->saveAR();
+    }
+
+    /**
+     * @param int $statusId
+     */
     public function setStatus(int $statusId): void
     {
         switch ($statusId) {
@@ -84,51 +131,8 @@ class Apple extends ar\Apple
             default:
                 new Exception('Неизвестное состояние');
         }
-    }
 
-    /**
-     * @throws Exception
-     */
-    private function saveAR(): void
-    {
-        $transaction = $this->getDb()->beginTransaction();
-        try {
-            if (!$this->save()){
-                throw new Exception('Невозможно сохранить объект в базе');
-            }
-            $transaction->commit();
-        }
-        catch (Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function deleteAR(): void
-    {
-        $transaction = $this->getDb()->beginTransaction();
-        try {
-            $result = $this->delete();
-            if ($result !== false && $result > 0) {
-                throw new Exception('Невозможно удалить объект из базы');
-            }
-            $transaction->commit();
-        }
-        catch (Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function applyChange(): void
-    {
-        $this->saveAR();
+        $this->setArAttribute('status', (string) $this->status);
     }
 
     /**
@@ -137,7 +141,6 @@ class Apple extends ar\Apple
     public function fall(): void
     {
         $this->status->fall();
-        $this->applyChange();
     }
 
     /**
@@ -148,7 +151,6 @@ class Apple extends ar\Apple
     public function eat(int $percent): void
     {
         $this->status->eat($percent);
-        $this->applyChange();
     }
 
     /**
@@ -159,11 +161,97 @@ class Apple extends ar\Apple
     public function throw(): void
     {
         $this->status->throw();
-        $this->applyChange();
     }
 
+    /**
+     * @return bool
+     */
     public function isRot(): bool
     {
         return $this->status->isRot();
+    }
+
+    /**
+     * @param int $percent
+     */
+    public function addEat(int $percent): void
+    {
+        $this->setArAttribute('eat', $percent);
+    }
+
+    /**
+     * @return int
+     */
+    public function getEat(): int
+    {
+        return $this->arApple->eat;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDateFall(): ?string
+    {
+        return $this->arApple->date_fall;
+    }
+
+    /**
+     * @return string
+     */
+    public function getColor(): string
+    {
+        return $this->arApple->color;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->arApple->id;
+    }
+
+    /**
+     * @param $date
+     */
+    public function setDateFall($date): void
+    {
+        $this->setArAttribute('date_fall', $date);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateCreate(): string
+    {
+        return $this->arApple->date_create;
+    }
+
+    /**
+     * @return AppleStatus
+     */
+    public function getStatus(): AppleStatus
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $nameAttribute
+     * @param $value
+     * @throws Exception
+     */
+    protected function setArAttribute(string $nameAttribute, $value): void
+    {
+        $this->arApple->$nameAttribute = $value;
+        $this->applyChange();
+    }
+
+    /**
+     * @return float
+     */
+    public function getSize(): float
+    {
+        $size = 1 - $this->getEat() / 100;
+        return $size < 0 ? 0 : $size;
     }
 }

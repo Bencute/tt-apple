@@ -6,9 +6,20 @@ namespace common\models;
 
 use Exception;
 
+/**
+ * Class AppleStatus
+ * @package common\models
+ */
 abstract class AppleStatus
 {
+    /**
+     * @var int
+     */
     protected int $status;
+
+    /**
+     * @var Apple
+     */
     protected Apple $apple;
 
     /**
@@ -22,6 +33,9 @@ abstract class AppleStatus
         $this->apple = $apple;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return (string) $this->status;
@@ -35,21 +49,34 @@ abstract class AppleStatus
         return $this->status;
     }
 
+    /**
+     * @return bool
+     */
     public function isRot(): bool
     {
         return false;
     }
 
+    /**
+     * @throws Exception
+     */
     public function fall(): void
     {
         throw new Exception('Недопустимое действие');
     }
 
+    /**
+     * @param int $percent
+     * @throws Exception
+     */
     public function eat(int $percent): void
     {
         throw new Exception('Недопустимое действие');
     }
 
+    /**
+     * @throws Exception
+     */
     public function throw(): void
     {
         throw new Exception('Недопустимое действие');

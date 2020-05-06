@@ -4,14 +4,20 @@
 namespace common\models;
 
 
-use Exception;
 use yii\db\Expression;
 
+/**
+ * Class AppleStatusTree
+ * @package common\models
+ */
 class AppleStatusTree extends AppleStatus
 {
+    /**
+     * {@inheritDoc}
+     */
     public function fall(): void
     {
         $this->apple->setStatus(Apple::STATUS_FALL);
-        $this->apple->date_fall = new Expression('NOW()');
+        $this->apple->setDateFall(new Expression('NOW()'));
     }
 }
